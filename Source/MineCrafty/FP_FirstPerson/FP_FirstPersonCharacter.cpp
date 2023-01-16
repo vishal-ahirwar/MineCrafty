@@ -17,6 +17,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogFPChar, Warning, All);
 
 AFP_FirstPersonCharacter::AFP_FirstPersonCharacter()
 {
+	this->Reach = 45.f;
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
@@ -64,6 +65,10 @@ void AFP_FirstPersonCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	check(PlayerInputComponent);
 	
 	// Set up gameplay key bindings
+	PlayerInputComponent->BindAction("Hit", EInputEvent::IE_Pressed, this, &AFP_FirstPersonCharacter::Hit);
+	PlayerInputComponent->BindAction("Add", EInputEvent::IE_Pressed, this, &AFP_FirstPersonCharacter::Add);
+	PlayerInputComponent->BindAction("Sub", EInputEvent::IE_Pressed, this, &AFP_FirstPersonCharacter::Sub);
+
 
 	// Bind jump events
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
@@ -261,3 +266,40 @@ void AFP_FirstPersonCharacter::TryEnableTouchscreenMovement(UInputComponent* Pla
 	PlayerInputComponent->BindTouch(EInputEvent::IE_Released, this, &AFP_FirstPersonCharacter::EndTouch);
 	PlayerInputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AFP_FirstPersonCharacter::TouchUpdate);	
 }
+void AFP_FirstPersonCharacter::Hit()
+{
+	FHitResult Result;
+	FVector Start{ this->GetFirstPersonCameraComponent()->GetComponentLocation() };
+	FVector End{ (this->GetFirstPersonCameraComponent()->GetForwardVector() * Reach) + Start };
+
+	
+	if (GetWorld()->LineTraceSingleByChannel(Result, Start, End, ECollisionChannel::ECC_Visibility))
+	{
+		if (Result.GetActor())
+		{
+			FVector out{};
+			if (bAdd)
+			{
+				out = ClampVector(Result.GetActor()->GetActorScale3D() + 0.2,FVector::ZeroVector,FVector(5.f,5.f,5.f));
+			}
+			else {
+				out = ClampVector(Result.GetActor()->GetActorScale3D() - 0.2,FVector::ZeroVector,FVector(5.f,5.f,5.f));
+			};
+
+			Result.GetActor()->SetActorScale3D(out);
+			
+			UE_LOG(LogTemp,Error,TEXT("Current Actor : %s"),*Result.GetActor()->GetName())
+		}
+		;
+	};
+
+};
+void AFP_FirstPersonCharacter::Add()
+{
+	this->bAdd = true;
+};
+void AFP_FirstPersonCharacter::Sub()
+{
+	this->bAdd = false;
+};
+

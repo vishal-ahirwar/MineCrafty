@@ -152,5 +152,13 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+private:
+	void Hit();
+	void Sub();
+	void Add();
+
+	UPROPERTY(EditDefaultsOnly)
+		float Reach{};
+	bool bAdd{};
 };
 
