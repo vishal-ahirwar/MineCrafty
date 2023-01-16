@@ -288,6 +288,7 @@ void AFP_FirstPersonCharacter::Hit()
 
 			Result.GetActor()->SetActorScale3D(out);
 			
+
 			UE_LOG(LogTemp,Error,TEXT("Current Actor : %s"),*Result.GetActor()->GetName())
 		}
 		;
